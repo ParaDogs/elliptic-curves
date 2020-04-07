@@ -48,9 +48,10 @@ class Elliptic:
         assert isinstance(generator, EPoint), "Wrong generator class. It must be EPoint."
         assert generator.curve == self, "The curves should be the same."
         res = []
+        g = generator
         for i in range(n):
             res.append(generator)
-            generator += generator
+            generator += g
         return res
 
 
@@ -71,7 +72,7 @@ class EPoint:
         return self.curve == other.curve and self.x == other.x and self.y == other.y
 
     def negative(self):
-        return EPoint(self.curve, self.x % self.curve.field_power, -self.y % self.curve.field_power)
+        return EPoint(self.curve, self.x, -self.y % self.curve.field_power)
 
     def __add__(self, other):
         assert isinstance(other, EPoint), "Wrong operand class. It must be EPoint."
@@ -86,7 +87,12 @@ class EPoint:
         y1 = self.y
         x2 = other.x
         y2 = other.y
-        if self == other.negative():
+        null = EPoint(self.curve, 0,0)
+        if self == null:
+            return other
+        elif other == null:
+            return self
+        elif self == other.negative():
             return EPoint(self.curve,0,0)
         elif self != other:
             la = ((y2 - y1)*mulinv(x2 - x1, p)) % p
@@ -116,7 +122,7 @@ e = Elliptic(31991,0,0,0,31988,1000)
 G = EPoint(e,0,5585)
 n = 32089
 
-points = e.gen_points(G, n)
+points = e.gen_points(G, n*3)
 for p in points: print(p)
 
 print("Эллиптическая кривая: " + str(e))
