@@ -44,6 +44,16 @@ class Elliptic:
 
     def __str__(self):
         return "y^2 + " + self.a1 + " xy " + self.a3 + " y = x^3 + " + self.a2 + " x^2 + " + self.a4 + " x + " + self.a6
+    
+    def gen_points(self, generator, n):
+        assert isinstance(generator, EPoint), "Wrong generator class. It must be EPoint."
+        assert generator.curve == self, "The curves should be the same."
+        res = []
+        for i in range(n):
+            res.append(generator)
+            generator += generator
+        return res
+
 
 class EPoint:
     def __init__(self, curve, x, y):
@@ -54,6 +64,9 @@ class EPoint:
 
     def __str__(self):
         return '('+ str(self.x)+ ', '+ str(self.y)+ ')'
+
+    def __repr__(self):
+        return str(self)
 
     def __eq__(self, other):
         return self.curve == other.curve and self.x == other.x and self.y == other.y
@@ -90,4 +103,6 @@ e = Elliptic(31991,0,0,0,31988,1000)
 G = EPoint(e,0,5585)
 n = 32089
 
-print(G+G.negative())
+points = e.gen_points(G, n)
+for p in points: print(p)
+print("Сгенерировано точек: " + str(n))
