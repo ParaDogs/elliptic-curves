@@ -71,7 +71,7 @@ class EPoint:
         return self.curve == other.curve and self.x == other.x and self.y == other.y
 
     def negative(self):
-        return EPoint(self.curve, self.x, -self.y)
+        return EPoint(self.curve, self.x % self.curve.field_power, -self.y % self.curve.field_power)
 
     def __add__(self, other):
         assert isinstance(other, EPoint), "Wrong operand class. It must be EPoint."
