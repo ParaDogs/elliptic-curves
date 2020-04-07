@@ -22,8 +22,6 @@ def mulinv(n, p):
         return x % p
 
 class Elliptic:
-    field_power = a1 = a2 = a3 = a4 = a6 = 0
-
     def __init__(self, field_power, a1, a2, a3, a4, a6):
         self.field_power = field_power
         self.a1 = a1 % field_power
@@ -31,11 +29,12 @@ class Elliptic:
         self.a3 = a3 % field_power
         self.a4 = a4 % field_power
         self.a6 = a6 % field_power
-        assert 4*a4*a4*a4 + 27*a6*a6 != 0, "Singular elliptic curve"
+        assert (4*a4*a4*a4 + 27*a6*a6) % self.field_power != 0, "Singular elliptic curve"
     
     def contains(self, point):
         x = point.x
         y = point.y
+        if x == y == 0: return True
         p = self.field_power
         return (y*y + self.a1*x*y + self.a3*y) % p == (x*x*x + self.a2*x*x + self.a4*x + self.a6) % p
 
@@ -43,7 +42,7 @@ class Elliptic:
         return self.a1 == other.a1 and self.a2 == other.a2 and self.a3 == other.a3 and self.a4 == other.a4 and self.a6 == other.a6
 
     def __str__(self):
-        return "y^2 + " + self.a1 + " xy " + self.a3 + " y = x^3 + " + self.a2 + " x^2 + " + self.a4 + " x + " + self.a6
+        return "y^2 + " + str(self.a1) + "xy + " + str(self.a3) + "y = x^3 + " + str(self.a2) + "x^2 + " + str(self.a4) + "x + " + str(self.a6)
     
     def gen_points(self, generator, n):
         assert isinstance(generator, EPoint), "Wrong generator class. It must be EPoint."
@@ -98,6 +97,20 @@ class EPoint:
         res_x = (la*la + a1*la - a2 - x1 - x2) % p
         res_y = (-(la + a1)*res_x - nu - a3) % p
         return EPoint(self.curve, res_x, res_y)
+    
+    def __mul__(self, other):
+        assert isinstance(other, int), "Wrong operand class. It must be Epoint"
+        res = self
+        if other == 0: return EPoint(self.curve, 0, 0)
+        for i in range(other-1):
+            res += self
+        return res
+
+    def __rmul__(self, other):
+        return self*other
+
+    def __hash__(self):
+        return hash(self.curve.field_power*self.x + self.y)
 
 e = Elliptic(31991,0,0,0,31988,1000)
 G = EPoint(e,0,5585)
@@ -105,4 +118,8 @@ n = 32089
 
 points = e.gen_points(G, n)
 for p in points: print(p)
+
+print("Эллиптическая кривая: " + str(e))
+print("Генератор: " + str(G))
 print("Сгенерировано точек: " + str(n))
+print("Уникальных точек (порядок генератора в группе): " + str(len(set(points))))
