@@ -1,3 +1,5 @@
+from random import randint
+
 def extended_euclidean_algorithm(a, b):
     s, old_s = 0, 1
     t, old_t = 1, 0
@@ -118,14 +120,55 @@ class EPoint:
     def __hash__(self):
         return hash(self.curve.field_power*self.x + self.y)
 
-e = Elliptic(31991,0,0,0,31988,1000)
-G = EPoint(e,0,5585)
+class Elgamal:
+    def __init__(self, curve, generator, secret):
+        self.curve = curve
+        self.generator = generator
+        assert isinstance(self.curve, Elliptic), "Curve must be elliptic"
+        assert isinstance(self.generator, EPoint), "Generator must be point on elliptic curve"
+        assert self.curve.contains(generator), "Curve does not contain this point."
+        d = 1
+        p = self.generator
+        null = EPoint(self.curve,0,0)
+        while (p != null):
+            p += self.generator
+            d += 1
+        self.generator_power = d
+        self.open_key = secret*self.generator
+
+    def encrypt(self, mes, key):
+        assert isinstance(mes, int), "mes must be integer"
+        assert isinstance(key, EPoint), "key must be point on elliptic curve"
+        assert self.curve.contains(key), "Curve does not contain key."
+        k = 523
+        # k = randint(1,self.generator_power-1)
+        R = k*self.generator
+        P = k*key
+        e = (mes*P.x) % self.curve.field_power
+        return [R, e]
+
+    def decrypt(self, point, enc, secret):
+        Q = secret*point
+        mes = (enc*mulinv(Q.x, self.curve.field_power)) % self.curve.field_power
+        return mes
+
+
+el = Elliptic(31991,0,0,0,31988,1000)
+G = EPoint(el,0,5585)
 n = 32089
 
-points = e.gen_points(G, n*3)
+# generate points
+points = el.gen_points(G, n)
 for p in points: print(p)
 
 print("Эллиптическая кривая: " + str(e))
 print("Генератор: " + str(G))
 print("Сгенерировано точек: " + str(n))
 print("Уникальных точек (порядок генератора в группе): " + str(len(set(points))))
+
+# Elgamal scheme
+c = 5103
+eg = Elgamal(el, G, c)
+m = 10000
+D = EPoint(el,12507,2027)
+print(eg.decrypt(*eg.encrypt(m, D), c))
