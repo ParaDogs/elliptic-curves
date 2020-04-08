@@ -161,7 +161,7 @@ n = 32089
 points = el.gen_points(G, n)
 for p in points: print(p)
 
-print("Эллиптическая кривая: " + str(e))
+print("Эллиптическая кривая: " + str(el))
 print("Генератор: " + str(G))
 print("Сгенерировано точек: " + str(n))
 print("Уникальных точек (порядок генератора в группе): " + str(len(set(points))))
