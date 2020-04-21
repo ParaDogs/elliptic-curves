@@ -41,7 +41,7 @@ class Elliptic:
         return (y*y + self.a1*x*y + self.a3*y) % p == (x*x*x + self.a2*x*x + self.a4*x + self.a6) % p
 
     def __eq__(self, other):
-        return self.a1 == other.a1 and self.a2 == other.a2 and self.a3 == other.a3 and self.a4 == other.a4 and self.a6 == other.a6
+        return self.field_power == other.field_power and self.a1 == other.a1 and self.a2 == other.a2 and self.a3 == other.a3 and self.a4 == other.a4 and self.a6 == other.a6
 
     def __str__(self):
         return "y^2 + " + str(self.a1) + "xy + " + str(self.a3) + "y = x^3 + " + str(self.a2) + "x^2 + " + str(self.a4) + "x + " + str(self.a6)
